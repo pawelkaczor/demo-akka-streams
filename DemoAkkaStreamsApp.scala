@@ -16,14 +16,14 @@
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
-import akka.stream.{ ActorFlowMaterializer, FlowMaterializer }
+import akka.stream.{ ActorMaterializer, Materializer }
 import scala.concurrent.Future
 
 object DemoAkkaStreamsApp {
 
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem("demo-akka-streams")
-    implicit val mat = ActorFlowMaterializer()
+    implicit val mat = ActorMaterializer()
     import system.dispatcher
 
     // Sequencing the demos which would run in parallel otherwise!
@@ -39,17 +39,17 @@ object DemoAkkaStreamsApp {
     }
   }
 
-  def demo1()(implicit mat: FlowMaterializer): Future[Unit] = {
+  def demo1()(implicit mat: Materializer): Future[Unit] = {
     //val printNumbers = Source(1.to(7)).to(Sink.foreach(println))
     val printNumbers = Source(1.to(7)).toMat(Sink.foreach(println))(Keep.right)
     println("Demo 1:")
     printNumbers.run()
   }
 
-  def demo2()(implicit mat: FlowMaterializer): Future[Int] =
+  def demo2()(implicit mat: Materializer): Future[Int] =
     Source(1.to(7)).runWith(Sink.fold(0)(_ + _))
 
-  def demo3()(implicit mat: FlowMaterializer): Future[Int] = {
+  def demo3()(implicit mat: Materializer): Future[Int] = {
     val doubler = Flow[Int].map(_ * 2)
     Source(() => Iterator.from(1))
       .via(doubler)
